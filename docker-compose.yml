@@ -1,0 +1,95 @@
+version: '2'
+services:
+  mysql:
+    restart: always
+    container_name: mysql
+    image: mysql:5.6
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql:/var/lib/mysql
+    network_mode: bridge
+    env_file:
+      - ./.env
+  lychee:
+    restart: always
+    container_name: lychee
+    image: linuxserver/lychee:v3.2.16-ls35
+    links:
+      - mysql
+    environment:
+      VIRTUAL_HOST: ${LYCHEE_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${LYCHEE_VIRTUAL_HOST}
+      PUID: 1000
+      PGID: 1000
+      TZ: Asia/Shanghai
+    volumes:
+      - ./lychee/config:/config
+      - ./lychee/pictures:/pictures
+    network_mode: bridge
+    env_file:
+      - ./.env
+  wordpress:
+    restart: always
+    container_name: wordpress
+    image: wordpress:php7.3
+    links:
+      - mysql
+    environment:
+      VIRTUAL_HOST: ${WORDPRESS_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${WORDPRESS_VIRTUAL_HOST}
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: ${MYSQL_ROOT_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+    volumes:
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./wordpress:/var/www/html
+    network_mode: bridge
+    env_file:
+      - ./.env
+  netdata:
+    restart: always
+    container_name: netdata
+    image: netdata/netdata:v1.18.1
+    environment:
+      VIRTUAL_HOST: ${NETDATA_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${NETDATA_VIRTUAL_HOST}
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    network_mode: bridge
+    env_file:
+      - ./.env
+  nginx-proxy:
+    restart: always
+    container_name: nginx-proxy
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - dhparam:/etc/nginx/dhparam
+      - certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    network_mode: bridge
+  letsencrypt:
+    restart: always
+    container_name: letsencrypt
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - certs:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    network_mode: bridge
+volumes:
+  conf:
+  vhost:
+  html:
+  dhparam:
+  certs:
