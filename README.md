@@ -9,7 +9,7 @@ $ cd blog-starter
 编辑 ```.env``` 文件，根据个人喜好修改环境变量。本地调试时，如果自定义域名，需要修改 ```/ect/hosts``` 文件，示例如下：
 
 ```
-27.0.0.1 example.com
+127.0.0.1 example.com
 127.0.0.1 lychee.example.com
 127.0.0.1 netdata.example.com
 ```
@@ -22,7 +22,7 @@ $ docker-compose up
 
 ## Lychee 图床配置
 
-浏览器访问 http://lychee.example.com，首次访问会要求输入账号和密码，示例如下：
+浏览器访问 http://lychee.example.com 首次访问会要求输入账号和密码，示例如下：
 
 ```
 host: mysql # 固定值
@@ -75,6 +75,6 @@ mysql> show databases;
 Query OK, 1 row affected (0.01 sec)
 ```
 
-浏览器访问 http://example.com/wp-admin/install.php，准备初始化 Wordpress，配置完成后，页面会自动重定向到 http://example.com/wp-login.php 管理后台登陆页面，使用刚刚配置的账号和密码登陆即可。
+浏览器访问 http://example.com/wp-admin/install.php 准备初始化 Wordpress 配置完成后，页面会自动重定向到 http://example.com/wp-login.php 管理后台登陆页面，使用刚刚配置的账号和密码登陆即可。
 
 访问 http://example.com 即可以看到通过 Wordpress 搭建的 Blog。
